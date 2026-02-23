@@ -1,0 +1,1 @@
+// daftar.js - Removed unnecessary JavaScript to allow normal form submission

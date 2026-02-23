@@ -1,0 +1,271 @@
+🎨 VISUAL GUIDE - MULTI-ACCOUNT LOGIN FEATURE
+==============================================
+
+## 1️⃣ NAVBAR APPEARANCE
+
+┌─────────────────────────────────────────────────────────┐
+│ Perpuski    Halo, User Test 1    [Avatar]▼    Logout   │
+└─────────────────────────────────────────────────────────┘
+                              ↑
+                         Account Switcher Button
+                    (Clickable area di navbar)
+
+
+## 2️⃣ DROPDOWN WHEN CLICKED
+
+┌─────────────────────────────────────────────────────────┐
+│ Perpuski    Halo, User Test 1    [Avatar]▼    Logout   │
+└─────────────────────────────────────────────────────────┘
+                            ↓
+        ┌──────────────────────────────────┐
+        │ AKUN AKTIF                       │
+        ├──────────────────────────────────┤
+        │ ┌──────────────────────────────┐ │
+        │ │ [Avatar] User Test 1      ✓  │ │  ← Current active
+        │ │ user1@test.com            × │ │
+        │ │ [user]                       │ │
+        │ └──────────────────────────────┘ │
+        ├──────────────────────────────────┤
+        │ ┌──────────────────────────────┐ │
+        │ │ [Avatar] User Test 2         │ │  ← Inactive (clickable to switch)
+        │ │ user2@test.com            × │ │
+        │ │ [user]                       │ │
+        │ └──────────────────────────────┘ │
+        ├──────────────────────────────────┤
+        │ ┌──────────────────────────────┐ │
+        │ │ [Avatar] Admin Test          │ │  ← Can switch
+        │ │ admin@test.com            × │ │
+        │ │ [admin]                      │ │
+        │ └──────────────────────────────┘ │
+        ├──────────────────────────────────┤
+        │ [Logout Semua] (tombol)          │
+        └──────────────────────────────────┘
+
+
+## 3️⃣ ACCOUNT ITEM DETAILS
+
+    ┌────────────────────────────┐
+    │ [Avatar 1x1] Name      ✓/  │
+    │              email    space│
+    │              [role]        │
+    └────────────────────────────┘
+    
+    Avatar: Circle image / Initial
+    Name: User's full name
+    Email: User's email address
+    Role: Badge showing [user], [admin], [petugas]
+    ✓: Checkmark jika account sedang active
+    ×: Close button untuk logout account ini
+
+
+## 4️⃣ INTERACTION FLOW
+
+    LOGIN SCREEN
+         ↓
+    [Login User 1] ─→ Account 1 Active
+         ↓
+    [Login User 2] ─→ Account 1 + Account 2 Active
+         ↓
+    Click Account Switcher
+         ↓
+    Dropdown Muncul with 2 Accounts
+         ↓
+    [Click Account 2 to Switch] ─→ Auto logout User 1
+         ↓                        ↓
+    Account 2 Active ←──── Auth switch + Auto login
+         ↓
+    Redirect to /home (sesuai role)
+
+
+## 5️⃣ BUTTON BEHAVIORS
+
+A. CLICK ON ACCOUNT ITEM (tidak termasuk X button)
+   ↓
+   Switch ke akun tersebut
+   ↓
+   Auto logout akun saat ini
+   ↓
+   Auto login akun baru
+   ↓
+   Redirect sesuai role
+   ↓
+   Dropdown close
+
+B. CLICK ON X BUTTON (close/remove button)
+   ↓
+   Logout dari akun tersebut
+   ↓
+   Hapus dari database
+   ↓
+   Dropdown update (refresh list)
+   ↓
+   Jika logout akun yang sedang active:
+      → Redirect ke akun lain / logout
+   Jika logout akun yang tidak active:
+      → Hanya remove dari list
+
+C. CLICK ON "LOGOUT SEMUA" BUTTON
+   ↓
+   Confirm dialog
+   ↓
+   Logout semua akun
+   ↓
+   Clear session
+   ↓
+   Redirect ke / (home)
+
+
+## 6️⃣ RESPONSIVE DESIGN
+
+DESKTOP (768px+):
+┌────────────────────────────────────────────────┐
+│ Logo    Nav Links      Halo User [Avatar] Logout│
+└────────────────────────────────────────────────┘
+         Account name visible     ↑
+         Full dropdown style      Account Switcher
+
+
+MOBILE (<768px):
+┌──────────────────────────┐
+│ Logo        [Avatar]▼ X  │
+└──────────────────────────┘
+             ↑
+    Account name HIDDEN
+    Only avatar visible
+    Full dropdown below
+
+
+## 7️⃣ STYLING DETAILS
+
+Colors:
+  Primary Gradient: #667eea → #764ba2 (purple)
+  Background: white
+  Text: #333
+  Secondary: #999
+  Role Badge: #f0f4ff background, #667eea text
+  Hover: #f9f9f9 background
+  Active: #f0f7ff background
+
+Spacing:
+  Button padding: 8px 12px
+  Item padding: 12px 16px
+  Avatar size: 32px (button), 36px (item)
+  Gap between elements: 8-12px
+
+Shadows:
+  Dropdown: 0 8px 24px rgba(0,0,0,0.12)
+  Button hover: 0 4px 12px rgba(102,126,234,0.4)
+
+Animations:
+  Smooth transitions: 0.3s ease
+  Button hover effect: translateY(-2px)
+
+
+## 8️⃣ ERROR STATES
+
+Loading:
+  ↓
+  "Memuat akun..." text shown
+
+Empty State:
+  ↓
+  "Tidak ada akun lain yang login" text shown
+
+Error:
+  ↓
+  Red error message: "Gagal memuat akun"
+
+Network Error:
+  ↓
+  Alert: "Terjadi kesalahan saat switch akun"
+
+
+## 9️⃣ ACCESSIBILITY
+
+✓ Keyboard navigation (Tab, Enter)
+✓ Click outside to close dropdown
+✓ Confirmation dialogs for destructive actions
+✓ ARIA labels (if using modern HTML)
+✓ Clear visual feedback on hover/active states
+✓ Readable text contrast
+✓ Proper button sizing (min 44px on mobile)
+
+
+## 🔟 USER JOURNEY EXAMPLE
+
+Step 1: Visit Application
+┌──────────────────────────────────────────────┐
+│ Perpuski  [Login] [Register]                 │
+└──────────────────────────────────────────────┘
+
+Step 2: Click Login
+→ Redirect to /login
+
+Step 3: Enter user1@test.com / password123
+→ Submit form
+
+Step 4: Login Success, Redirect to /home
+┌──────────────────────────────────────────────┐
+│ Perpuski  Halo, User Test 1  [Avatar]▼ Logout│
+└──────────────────────────────────────────────┘
+
+Step 5: Click Account Switcher
+→ Dropdown shows 1 account
+
+Step 6: Go back to /login
+  Option A: Click Logout button → logout then login
+  Option B: Open /login in new tab → login to other account
+  
+  Using Option B (Open in new tab):
+  → This will NOT work because different tab = different session
+  
+  Recommended: Use same tab approach
+  → Click /login link from dropdown or navbar
+
+Step 7: Login with user2@test.com
+→ Submit form
+
+Step 8: Login Success, Redirect to /home
+→ Sekarang session memiliki 2 accounts
+
+Step 9: Click Account Switcher
+→ Dropdown shows 2 accounts
+→ user1@test.com marked as active (✓)
+→ user2@test.com ready to switch
+
+Step 10: Click on user2@test.com
+→ System switches
+→ Redirect to /home
+→ Navbar now shows "Halo, User Test 2"
+
+Step 11: Click Account Switcher again
+→ Now user2@test.com marked as active (✓)
+→ user1@test.com ready to switch
+
+Step 12: Click X button next to user1@test.com
+→ Logout confirmation
+→ user1@test.com removed
+→ List refreshed, only user2 remains
+
+Step 13: Click "Logout Semua"
+→ Confirmation dialog
+→ All accounts logout
+→ Redirect to / (home)
+
+Step 14: Back at login screen
+→ No accounts in session
+→ Complete flow
+
+
+═══════════════════════════════════════════════════
+
+REMEMBER:
+
+• Same Tab = Shared Session = Multiple Accounts Work
+• Different Tabs = Different Sessions = Separate Accounts
+
+• Switch Account = Logout old + Login new (auto)
+• Logout Account = Remove from session (manual)
+• Logout All = Complete session clear (nuclear option)
+
+═══════════════════════════════════════════════════
