@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Laporan Pengembalian - Perpustakaan</title>
+    <title>Laporan - Perpustakaan</title>
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
 </head>
 <body>
@@ -12,24 +12,75 @@
 
     <main class="main-content">
         <section class="welcome-section">
-            <h1 style="margin-bottom: 20px;">Laporan Pengembalian Buku</h1>
-            <p>Lihat semua laporan pengembalian buku dari peminjam.</p>
+            <h1 style="margin-bottom: 20px;">Laporan</h1>
+            <p>Daftar laporan peminjaman, pengembalian, dan daftar buku. Gunakan tab untuk berpindah antar laporan.</p>
         </section>
 
-        @if(session('success'))
-        <div style="background: #d4edda; color: #155724; padding: 15px; margin-bottom: 20px; border-radius: 5px; border-left: 4px solid #28a745;">
-            <i class="fas fa-check-circle"></i> {{ session('success') }}
+        <!-- tabs -->
+        <div class="report-tabs" style="margin:20px 0;">
+            <button class="tab active" data-target="sectionPeminjaman">Peminjaman</button>
+            <button class="tab" data-target="sectionPengembalian">Pengembalian</button>
         </div>
-        @endif
 
-        @if(session('error'))
-        <div style="background: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border-radius: 5px; border-left: 4px solid #dc3545;">
-            <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
-        </div>
-        @endif
+        <!-- PEMINJAMAN SECTION -->
+        <section id="sectionPeminjaman" class="table-section">
+            <div class="table-container" id="peminjamanTableContainer">
+                <div class="table-header">
+                    <h2>Riwayat Transaksi (Peminjaman)</h2>
+                    <div class="table-controls">
+                        <input type="text" id="searchPeminjaman" placeholder="Cari nama peminjam atau judul buku..." style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 300px;">
+                        <select id="filterStatus" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; margin-left: 10px;">
+                            <option value="">Semua Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="returned">Returned</option>
+                        </select>
+                        <button class="btn btn-secondary btn-sm" style="margin-left:10px;" onclick="printSection('peminjamanTableContainer')">🖨️ Print</button>
+                    </div>
+                </div>
 
-        <section class="table-section">
-            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nama Peminjam</th>
+                            <th>Judul Buku</th>
+                            <th>Tanggal Pinjam</th>
+                            <th>Tanggal Kembali</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="peminjamanRows">
+                        @forelse($transactionHistory as $loan)
+                        <tr class="peminjaman-row" data-peminjam="{{ strtolower($loan->user->name) }}" data-buku="{{ strtolower($loan->buku->judul) }}" data-status="{{ $loan->status }}">
+                            <td>{{ $loan->user->name }}</td>
+                            <td>{{ $loan->buku->judul }}</td>
+                            <td>{{ $loan->tanggal_pinjam->format('d/m/Y') }}</td>
+                            <td>{{ $loan->tanggal_kembali ? $loan->tanggal_kembali->format('d/m/Y') : '-' }}</td>
+                            <td>
+                                <span class="status-badge status-{{ $loan->status }}">
+                                    {{ $loan->status === 'returned' ? 'Dikembalikan' : ucfirst(str_replace('_', ' ', $loan->status)) }}
+                                </span>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="text-center">Tidak ada riwayat transaksi</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+
+                <div class="pagination">
+                    <p>Menampilkan {{ $transactionHistory->count() }} dari {{ $transactionHistory->total() }} data</p>
+                    {{ $transactionHistory->links() }}
+                </div>
+            </div>
+        </section>
+
+        <!-- PENGEMBALIAN SECTION -->
+        <section id="sectionPengembalian" class="table-section" style="display:none;">
+            <div class="table-container" id="pengembalianTableContainer">
                 <div class="table-header">
                     <h2>Daftar Laporan Pengembalian</h2>
                     <div class="table-controls">
@@ -40,6 +91,7 @@
                             <option value="rusak">Rusak</option>
                             <option value="hilang">Hilang</option>
                         </select>
+                        <button class="btn btn-secondary btn-sm" style="margin-left:10px;" onclick="printSection('pengembalianTableContainer')">🖨️ Print</button>
                     </div>
                 </div>
 
@@ -86,6 +138,8 @@
                 </div>
             </div>
         </section>
+
+
     </main>
 
     <!-- Modal Detail Laporan -->
@@ -123,11 +177,21 @@
         </div>
     </div>
 
-
-    <!-- Modal Ubah Denda -->
-    <!-- Dihapus -->
-    
     <style>
+        .report-tabs .tab {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+            cursor: pointer;
+            margin-right: 4px;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+        .report-tabs .tab.active {
+            background: white;
+            border-bottom: 1px solid white;
+            font-weight: bold;
+        }
         .modal {
             position: fixed;
             z-index: 1000;
@@ -266,6 +330,84 @@
 
     <script src="{{ asset('js/admin.js') }}"></script>
     <script>
+        // tab switching
+        document.querySelectorAll('.report-tabs .tab').forEach(tab=>{
+            tab.addEventListener('click', function(){
+                document.querySelectorAll('.report-tabs .tab').forEach(t=>t.classList.remove('active'));
+                this.classList.add('active');
+                const target=this.dataset.target;
+                document.querySelectorAll('.table-section').forEach(sec=>{
+                    sec.style.display = (sec.id === target) ? '' : 'none';
+                });
+            });
+        });
+
+        // peminjaman search/filter
+        document.getElementById('searchPeminjaman')?.addEventListener('keyup', function(e){
+            const term = e.target.value.toLowerCase();
+            const filter = document.getElementById('filterStatus').value;
+            document.querySelectorAll('.peminjaman-row').forEach(row => {
+                const peminjam = row.dataset.peminjam || '';
+                const buku = row.dataset.buku || '';
+                const status = row.dataset.status || '';
+                const matchSearch = peminjam.includes(term) || buku.includes(term);
+                const matchFilter = !filter || status === filter;
+                row.style.display = (matchSearch && matchFilter) ? '' : 'none';
+            });
+        });
+        document.getElementById('filterStatus')?.addEventListener('change', function(e){
+            const term = document.getElementById('searchPeminjaman').value.toLowerCase();
+            const filter = e.target.value;
+            document.querySelectorAll('.peminjaman-row').forEach(row => {
+                const peminjam = row.dataset.peminjam || '';
+                const buku = row.dataset.buku || '';
+                const status = row.dataset.status || '';
+                const matchSearch = peminjam.includes(term) || buku.includes(term);
+                const matchFilter = !filter || status === filter;
+                row.style.display = (matchSearch && matchFilter) ? '' : 'none';
+            });
+        });
+
+        // pengembalian search/filter
+        document.getElementById('searchInput')?.addEventListener('keyup', function(e){
+            const searchTerm = e.target.value.toLowerCase();
+            const filterKondisi = document.getElementById('filterKondisi').value;
+            document.querySelectorAll('.laporan-row').forEach(row => {
+                const peminjam = row.dataset.peminjam || '';
+                const buku = row.dataset.buku || '';
+                const kondisi = row.dataset.kondisi || '';
+                const matchSearch = peminjam.includes(searchTerm) || buku.includes(searchTerm);
+                const matchFilter = !filterKondisi || kondisi === filterKondisi;
+                row.style.display = (matchSearch && matchFilter) ? '' : 'none';
+            });
+        });
+        document.getElementById('filterKondisi')?.addEventListener('change', function(e){
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filterKondisi = e.target.value;
+            document.querySelectorAll('.laporan-row').forEach(row => {
+                const peminjam = row.dataset.peminjam || '';
+                const buku = row.dataset.buku || '';
+                const kondisi = row.dataset.kondisi || '';
+                const matchSearch = peminjam.includes(searchTerm) || buku.includes(searchTerm);
+                const matchFilter = !filterKondisi || kondisi === filterKondisi;
+                row.style.display = (matchSearch && matchFilter) ? '' : 'none';
+            });
+        });
+
+
+        // generic print
+        function printSection(containerId) {
+            const el = document.getElementById(containerId);
+            if (!el) return window.print();
+            const w = window.open('', '_blank');
+            const styleSheets = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).map(l=>l.href);
+            const styles = styleSheets.map(h=>`<link rel="stylesheet" href="${h}">`).join('\n');
+            w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Print</title>${styles}</head><body>${el.outerHTML}</body></html>`);
+            w.document.close();
+            w.focus();
+            setTimeout(()=>{ w.print(); w.close(); }, 500);
+        }
+
         function showDetailLaporan(id, peminjam, buku, tanggal, kondisi, keterangan) {
             document.getElementById('detailPeminjam').value = peminjam;
             document.getElementById('detailBuku').value = buku;
@@ -274,51 +416,10 @@
             document.getElementById('detailKeterangan').value = keterangan || '-';
             document.getElementById('modalDetail').style.display = 'block';
         }
-
-        function closeModalDetail() {
-            document.getElementById('modalDetail').style.display = 'none';
-        }
-
-        // Search functionality
-        document.getElementById('searchInput').addEventListener('keyup', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const filterKondisi = document.getElementById('filterKondisi').value;
-            
-            document.querySelectorAll('.laporan-row').forEach(row => {
-                const peminjam = row.dataset.peminjam;
-                const buku = row.dataset.buku;
-                const kondisi = row.dataset.kondisi;
-                
-                const matchSearch = peminjam.includes(searchTerm) || buku.includes(searchTerm);
-                const matchFilter = !filterKondisi || kondisi === filterKondisi;
-                
-                row.style.display = (matchSearch && matchFilter) ? '' : 'none';
-            });
-        });
-
-        // Filter functionality
-        document.getElementById('filterKondisi').addEventListener('change', function(e) {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const filterKondisi = e.target.value;
-            
-            document.querySelectorAll('.laporan-row').forEach(row => {
-                const peminjam = row.dataset.peminjam;
-                const buku = row.dataset.buku;
-                const kondisi = row.dataset.kondisi;
-                
-                const matchSearch = peminjam.includes(searchTerm) || buku.includes(searchTerm);
-                const matchFilter = !filterKondisi || kondisi === filterKondisi;
-                
-                row.style.display = (matchSearch && matchFilter) ? '' : 'none';
-            });
-        });
-
+        function closeModalDetail() { document.getElementById('modalDetail').style.display = 'none'; }
         window.onclick = function(event) {
             const modalDetail = document.getElementById('modalDetail');
-            
-            if (event.target === modalDetail) {
-                modalDetail.style.display = 'none';
-            }
+            if (event.target === modalDetail) { modalDetail.style.display = 'none'; }
         }
     </script>
 </body>

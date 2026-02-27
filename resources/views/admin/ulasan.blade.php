@@ -33,6 +33,7 @@
                 <div class="table-header">
                     <h2>Daftar Ulasan</h2>
                     <div class="table-controls">
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="window.print()" style="margin-right:10px;"><i class="fas fa-print"></i> Print</button>
                         <input type="text" id="searchInput" placeholder="Cari nama peminjam atau judul buku..." style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 300px;">
                         <select id="filterRating" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; margin-left: 10px;">
                             <option value="">Semua Rating</option>
@@ -145,6 +146,7 @@
                 <h2>Edit Ulasan</h2>
                 <button type="button" class="modal-close" onclick="closeModalEdit()">&times;</button>
             </div>
+            
             <form id="formEdit" method="POST">
                 @csrf
                 @method('PATCH')
@@ -159,6 +161,7 @@
                             <option value="5">★★★★★ (5 Bintang)</option>
                         </select>
                     </div>
+                    
                     <div class="form-group">
                         <label for="editUlasan">Ulasan:</label>
                         <textarea id="editUlasan" name="ulasan" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: none;" rows="5"></textarea>
@@ -304,6 +307,15 @@
 
         .btn-secondary:hover {
             background-color: #5a6268;
+        }
+
+        /* print formatting */
+        @media print {
+            body, .main-content, .table-section { margin:0; padding:0; }
+            .table-controls, .pagination, .btn, .modal, .admin-sidebar { display:none !important; }
+            table { width:100% !important; border-collapse:collapse !important; }
+            table, th, td { border:1px solid #000 !important; }
+            th, td { padding:4px !important; font-size:12px; }
         }
     </style>
 

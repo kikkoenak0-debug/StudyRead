@@ -78,7 +78,7 @@
             <div class="book-grid">
                 @foreach($buku->take(4) as $item)
                 <div class="book-item" onclick="window.location.href='{{ route('buku.show', $item->id) }}'">
-                    @if($item->foto)
+                    @if($item->foto && \Illuminate\Support\Facades\Storage::disk('public')->exists($item->foto))
                         <img src="{{ asset('storage/' . $item->foto) }}" alt="Cover Buku" class="cover">
                     @else
                         <div class="cover">📚</div>
@@ -94,7 +94,7 @@
             <div class="book-grid">
                 @foreach($buku->skip(4) as $item)
                 <div class="book-item" onclick="window.location.href='{{ route('buku.show', $item->id) }}'">
-                    @if($item->foto)
+                    @if($item->foto && \Illuminate\Support\Facades\Storage::disk('public')->exists($item->foto))
                         <img src="{{ asset('storage/' . $item->foto) }}" alt="Cover Buku" class="cover">
                     @else
                         <div class="cover">📚</div>

@@ -18,12 +18,17 @@
         </header>
 
         <section class="table-section">
-            <div class="table-container" style="max-height: 500px; overflow: auto;">
+            <div class="table-container" style="max-width: none; overflow-x: auto;">
                 <div class="table-header">
                     <h2>Daftar Buku</h2>
-                    <a href="{{ route('petugas.kelola-buku.create') }}" class="btn-primary">
-                        <i class="fas fa-plus mr-1"></i> Tambah Buku
-                    </a>
+                    <div class="header-actions">
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="window.print()">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                        <a href="{{ route('petugas.kelola-buku.create') }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus mr-1"></i> Tambah Buku
+                        </a>
+                    </div>
                 </div>
 
                 @if(session('success'))
@@ -65,13 +70,15 @@
                             <td style="padding: 15px; border-bottom: 1px solid #dee2e6;"><span style="background: #e9ecef; color: #495057; padding: 4px 8px; border-radius: 12px; font-size: 0.85em;">{{ $item->kategori->nama ?? '' }}</span></td>
                             <td style="padding: 15px; border-bottom: 1px solid #dee2e6;">{{ $item->user->name ?? '-' }}</td>
                             <td style="padding: 15px; border-bottom: 1px solid #dee2e6; text-align: center; font-weight: bold; color: #28a745;">{{ $item->tersedia }}</td>
-                            <td style="padding: 15px; border-bottom: 1px solid #dee2e6; text-align: center;">
-                                <a href="{{ route('petugas.kelola-buku.edit', $item) }}" style="background: #007bff; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; margin-right: 5px; display: inline-block; transition: background 0.3s;" onmouseover="this.style.background='#0056b3'" onmouseout="this.style.background='#007bff'"><i class="fas fa-edit"></i> Edit</a>
-                                <form action="{{ route('petugas.kelola-buku.destroy', $item) }}" method="POST" style="display: inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" onclick="return confirm('Apakah Anda yakin ingin menghapus buku ini?')" style="background: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; transition: background 0.3s;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'"><i class="fas fa-trash"></i> Hapus</button>
-                                </form>
+                            <td class="text-right action-cell" style="padding: 15px; border-bottom: 1px solid #dee2e6;">
+                                <div class="row-actions">
+                                    <a href="{{ route('petugas.kelola-buku.edit', $item) }}" class="btn btn-sm btn-info">Edit</a>
+                                    <form action="{{ route('petugas.kelola-buku.destroy', $item) }}" method="POST" style="display: inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" onclick="return confirm('Apakah Anda yakin ingin menghapus buku ini?')" class="btn btn-sm btn-danger">Hapus</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         @empty
@@ -88,6 +95,27 @@
         </section>
     </main>
 
+<style>
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .header-actions button,
+    .header-actions a {
+        margin-left: 8px;
+    }
+    .row-actions {
+        display: inline-flex;
+        gap: 4px;
+        justify-content: flex-end;
+        align-items: center;
+    }
+    .action-cell {
+        white-space: nowrap;
+        min-width: 120px;
+    }
+</style>
 <script src="{{ asset('js/admin.js') }}"></script>
 </body>
 </html>

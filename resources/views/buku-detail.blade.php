@@ -35,7 +35,11 @@
             <div class="md:col-span-1">
                 <div class="bg-white rounded-lg shadow-md overflow-hidden sticky top-8">
                     @if($buku->foto)
-                        <img src="{{ asset('storage/' . $buku->foto) }}" alt="{{ $buku->judul }}" class="w-full h-96 object-cover">
+                        @if($buku->foto && \Illuminate\Support\Facades\Storage::disk('public')->exists($buku->foto))
+                            <img src="{{ asset('storage/' . $buku->foto) }}" alt="{{ $buku->judul }}" class="w-full h-96 object-cover">
+                        @else
+                            <div class="w-full h-96 flex items-center justify-center bg-gray-200">📚</div>
+                        @endif
                     @else
                         <div class="w-full h-96 bg-blue-100 flex items-center justify-center text-blue-500">
                             <i class="fas fa-book fa-8x"></i>

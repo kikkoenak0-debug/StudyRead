@@ -13,11 +13,27 @@ class PetugasController extends Controller
     public function index()
     {
         $totalBuku = Buku::count();
-        $peminjamanAktif = Pinjaman::whereIn('status', ['paid', 'approved'])->count();
+        $totalUsers = User::count();
+        // mirror admin logic for active loans and history
+        $peminjamanAktif = Pinjaman::whereIn('status', ['approved_pending_payment', 'approved'])->count();
+        $activeLoans = Pinjaman::with(['user', 'buku'])
+            ->whereIn('status', ['approved_pending_payment', 'approved'])
+            ->latest()
+            ->paginate(10);
+        $transactionHistory = Pinjaman::with(['user', 'buku'])
+            ->whereIn('status', ['approved', 'returned', 'rejected'])
+            ->latest()
+            ->paginate(10);
         $loansToConfirm = Pinjaman::with(['user', 'buku'])->where('status', 'pending')->get();
-        $allLoans = Pinjaman::with(['user', 'buku'])->latest()->paginate(10);
 
-        return view('petugas.dashboard', compact('totalBuku', 'peminjamanAktif', 'loansToConfirm', 'allLoans'));
+        return view('petugas.dashboard', compact(
+            'totalBuku',
+            'totalUsers',
+            'peminjamanAktif',
+            'activeLoans',
+            'transactionHistory',
+            'loansToConfirm'
+        ));
     }
 
     public function konfirmasi(Request $request, Pinjaman $pinjaman)
@@ -92,8 +108,12 @@ class PetugasController extends Controller
     public function laporan()
     {
         $laporanPengembalian = Laporan::with(['user', 'buku'])->latest()->paginate(10);
+        $transactionHistory = \App\Models\Pinjaman::with(['user', 'buku'])
+            ->whereIn('status', ['paid', 'approved', 'returned'])
+            ->latest()
+            ->paginate(20);
         
-        return view('petugas.laporan', compact('laporanPengembalian'));
+        return view('petugas.laporan', compact('laporanPengembalian', 'transactionHistory'));
     }
 
     public function ubahDenda(Request $request, Laporan $laporan)

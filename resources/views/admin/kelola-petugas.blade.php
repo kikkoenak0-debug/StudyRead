@@ -41,8 +41,9 @@
         <section class="table-section">
             <div class="container">
             <div class="table-container" style="max-height: 640px; overflow: auto;">
-                <div class="table-header">
+                <div class="table-header" style="display: flex; align-items: center; justify-content: space-between;">
                     <h2>Daftar Petugas</h2>
+                    <a href="{{ route('admin.kelola-petugas.create') }}" class="btn btn-primary" style="padding: 8px 16px;">➕ Tambah Petugas</a>
                 </div>
 
                 @if(session('success'))
@@ -101,7 +102,8 @@
                         <tr>
                             <td colspan="6" style="padding: 40px; text-align: center; color: #6c757d; font-style: italic; background: #f8f9fa;">
                                 <i class="fas fa-users" style="font-size: 48px; color: #dee2e6; margin-bottom: 10px;"></i><br>
-                                Belum ada petugas yang terdaftar.
+                                Belum ada petugas yang terdaftar.<br>
+                                <strong>Tambahkan petugas menggunakan tombol "Tambah Petugas" di atas.</strong>
                             </td>
                         </tr>
                         @endforelse

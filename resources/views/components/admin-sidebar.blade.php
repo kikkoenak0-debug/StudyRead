@@ -26,11 +26,7 @@
         </a>
         <a href="{{ route('admin.laporan') }}" class="nav-item {{ Route::currentRouteName() === 'admin.laporan' ? 'active' : '' }}">
             <i class="fas fa-file-alt"></i>
-            <span>Laporan Pengembalian</span>
-        </a>
-        <a href="{{ route('admin.riwayat-transaksi') }}" class="nav-item {{ Route::currentRouteName() === 'admin.riwayat-transaksi' ? 'active' : '' }}">
-            <i class="fas fa-file"></i>
-            <span>Laporan Peminjaman</span>
+            <span>Laporan</span>
         </a>
         
         <a href="{{ route('admin.ulasan') }}" class="nav-item {{ Route::currentRouteName() === 'admin.ulasan' ? 'active' : '' }}">

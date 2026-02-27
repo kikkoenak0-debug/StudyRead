@@ -29,7 +29,7 @@
                 </div>
                 <div class="input-group">
                     <label>Email</label>
-                    <input type="email" name="email" placeholder="Error" required>
+                    <input type="email" name="email" placeholder="Email" required>
                 </div>
                 <div class="input-group">
                     <label>New Password</label>

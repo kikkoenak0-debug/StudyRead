@@ -107,11 +107,6 @@ class AdminController extends Controller
         return redirect()->route('admin.kelola-pengguna.index')->with('success', 'Status pengguna berhasil diubah');
     }
 
-    public function riwayatTransaksi()
-    {
-        $transactionHistory = \App\Models\Pinjaman::with(['user', 'buku'])->whereIn('status', ['paid', 'approved', 'returned'])->latest()->paginate(20);
-        return view('admin.laporan_peminjaman', compact('transactionHistory'));
-    }
 
     public function konfirmasi(Request $request, Pinjaman $pinjaman)
     {
@@ -153,8 +148,12 @@ class AdminController extends Controller
     public function laporan()
     {
         $laporanPengembalian = Laporan::with(['user', 'buku'])->latest()->paginate(10);
+        $transactionHistory = \App\Models\Pinjaman::with(['user', 'buku'])
+            ->whereIn('status', ['paid', 'approved', 'returned'])
+            ->latest()
+            ->paginate(20);
         
-        return view('admin.laporan', compact('laporanPengembalian'));
+        return view('admin.laporan', compact('laporanPengembalian', 'transactionHistory'));
     }
 
     public function ulasan()
@@ -194,6 +193,45 @@ class AdminController extends Controller
     {
         $petugas = User::whereIn('role', ['petugas', 'admin'])->get();
         return view('admin.kelola-petugas', compact('petugas'));
+    }
+
+    /**
+     * Show form to create a new petugas/admin account.
+     */
+    public function createPetugas()
+    {
+        return view('admin.kelola-petugas.create');
+    }
+
+    /**
+     * Store a new petugas or admin user.
+     */
+    public function storePetugas(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+            'role' => 'required|in:admin,petugas',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $data = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
+            'is_active' => true,
+        ];
+
+        if ($request->hasFile('foto')) {
+            $path = $request->file('foto')->store('public/fotos');
+            $data['foto'] = basename($path);
+        }
+
+        User::create($data);
+
+        return redirect()->route('admin.kelola-petugas.index')->with('success', 'Petugas berhasil ditambahkan');
     }
 
     public function toggleStatusPetugas(User $user)

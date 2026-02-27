@@ -32,6 +32,16 @@
 
                 <div class="stat-card">
                     <div>
+                        <p class="text-sm text-gray-500 mb-1">Total Pengguna</p>
+                        <h2 class="text-3xl font-bold text-gray-800">{{ $totalUsers }}</h2>
+                    </div>
+                    <div class="stat-icon bg-green-500 text-white">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+
+                <div class="stat-card" onclick="showTab('aktif')" style="cursor: pointer;">
+                    <div>
                         <p class="text-sm text-gray-500 mb-1">Peminjaman Aktif</p>
                         <h2 class="text-3xl font-bold text-gray-800">{{ $peminjamanAktif }}</h2>
                     </div>
@@ -47,10 +57,10 @@
             <button class="tab-btn" onclick="showTab('konfirmasi')">Konfirmasi Peminjaman</button>
         </div>
 
-        <section class="table-section" id="riwayat-tab">
+        <section class="table-section" id="aktif-tab" style="display: none;">
             <div class="table-container">
                 <div class="table-header">
-                    <h2>Riwayat Peminjaman Buku</h2>
+                    <h2>Peminjaman Aktif</h2>
                 </div>
 
                 <table>
@@ -61,33 +71,67 @@
                             <th>Tanggal Pinjam</th>
                             <th>Tanggal Kembali</th>
                             <th>Status</th>
-                            <th class="text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($allLoans as $loan)
+                        @forelse($activeLoans as $loan)
                         <tr>
                             <td>{{ $loan->user->name }}</td>
                             <td>{{ $loan->buku->judul }}</td>
                             <td>{{ $loan->tanggal_pinjam->format('d/m/Y') }}</td>
                             <td>{{ $loan->tanggal_kembali ? $loan->tanggal_kembali->format('d/m/Y') : '-' }}</td>
-                            <td>{{ ucfirst(str_replace('_', ' ', $loan->status)) }}</td>
-                            <td class="text-right">
-                                <button type="button" class="btn btn-danger btn-sm" onclick="hapusPinjaman({{ $loan->id }}, this)">Hapus</button>
+                            <td>
+                                <span class="status-badge status-{{ $loan->status }}">
+                                    {{ ucfirst(str_replace('_', ' ', $loan->status)) }}
+                                </span>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center">Belum ada data peminjaman.</td>
+                            <td colspan="5" class="text-center">Tidak ada peminjaman aktif</td>
                         </tr>
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+        </section>
 
-                <div class="pagination">
-                    <p>Menampilkan {{ $allLoans->count() }} dari {{ $allLoans->total() }} data</p>
-                    {{ $allLoans->links() }}
+        <section class="table-section" id="riwayat-tab">
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>Riwayat Transaksi</h2>
                 </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nama Peminjam</th>
+                            <th>Judul Buku</th>
+                            <th>Tanggal Pinjam</th>
+                            <th>Tanggal Kembali</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($transactionHistory as $loan)
+                        <tr>
+                            <td>{{ $loan->user->name }}</td>
+                            <td>{{ $loan->buku->judul }}</td>
+                            <td>{{ $loan->tanggal_pinjam->format('d/m/Y') }}</td>
+                            <td>{{ $loan->tanggal_kembali ? $loan->tanggal_kembali->format('d/m/Y') : '-' }}</td>
+                            <td>
+                                <span class="status-badge status-{{ $loan->status }}">
+                                    {{ $loan->status === 'returned' ? 'Dikembalikan' : ucfirst(str_replace('_', ' ', $loan->status)) }}
+                                </span>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="text-center">Tidak ada riwayat transaksi</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </section>
 
@@ -120,7 +164,7 @@
                             </td>
                             <td class="text-right">
                                 <button class="btn btn-success btn-sm" onclick="konfirmasiPinjaman({{ $loan->id }}, 'approve', this)">Konfirmasi</button>
-                                <button type="button" class="btn btn-danger btn-sm" onclick="hapusPinjaman({{ $loan->id }}, this)">Hapus</button>
+                                <button class="btn btn-danger btn-sm" onclick="konfirmasiPinjaman({{ $loan->id }}, 'reject', this)">Tolak</button>
                             </td>
                         </tr>
                         @empty
@@ -132,6 +176,7 @@
                 </table>
             </div>
         </section>
+
 
         <!-- Modal untuk Form Pengembalian -->
         <div id="modalPengembalian" class="modal" style="display: none;">
@@ -282,22 +327,18 @@
         }
     </style>
     <script>
-        function showTab(tab) {
-            const riwayatTab = document.getElementById('riwayat-tab');
-            const konfirmasiTab = document.getElementById('konfirmasi-tab');
-            const buttons = document.querySelectorAll('.tab-btn');
+        function showTab(tabName) {
+            // hide all tabs first
+            document.getElementById('aktif-tab').style.display = 'none';
+            document.getElementById('riwayat-tab').style.display = 'none';
+            document.getElementById('konfirmasi-tab').style.display = 'none';
 
-            buttons.forEach(btn => btn.classList.remove('active'));
+            // clear button active states
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
-            if (tab === 'riwayat') {
-                riwayatTab.style.display = 'block';
-                konfirmasiTab.style.display = 'none';
-                buttons[0].classList.add('active');
-            } else if (tab === 'konfirmasi') {
-                riwayatTab.style.display = 'none';
-                konfirmasiTab.style.display = 'block';
-                buttons[1].classList.add('active');
-            }
+            // show selected tab and mark button
+            document.getElementById(tabName + '-tab').style.display = 'block';
+            event.target.classList.add('active');
         }
 
         function showFormPengembalian(pinjamanId, namaPeminjam, judulBuku) {
@@ -312,41 +353,6 @@
             document.getElementById('modalPengembalian').style.display = 'none';
         }
 
-        function hapusPinjaman(pinjamanId, button) {
-            if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                return;
-            }
-
-            button.disabled = true;
-            
-            fetch(`/petugas/pinjaman/${pinjamanId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification(data.message || 'Data berhasil dihapus', 'success');
-                    // Remove the row from the table
-                    const row = button.closest('tr');
-                    if (row) {
-                        row.remove();
-                    }
-                } else {
-                    showNotification(data.message || 'Terjadi kesalahan', 'error');
-                    button.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showNotification('Terjadi kesalahan pada server', 'error');
-                button.disabled = false;
-            });
-        }
 
         function konfirmasiPinjaman(loanId, action, button) {
             // Disable button to prevent double click
@@ -418,6 +424,11 @@
                 setTimeout(() => notification.remove(), 300);
             }, 3000);
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // default tab on page load
+            showTab('riwayat');
+        });
 
         window.onclick = function(event) {
             const modal = document.getElementById('modalPengembalian');

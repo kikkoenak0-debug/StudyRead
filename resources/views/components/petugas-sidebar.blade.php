@@ -14,7 +14,7 @@
         </a>
         <a href="{{ route('petugas.laporan') }}" class="nav-item {{ Route::currentRouteName() === 'petugas.laporan' ? 'active' : '' }}">
             <i class="fas fa-file-alt"></i>
-            <span>Laporan Pengembalian</span>
+            <span>Laporan</span>
         </a>
     </nav>
 

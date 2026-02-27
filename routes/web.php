@@ -45,7 +45,6 @@ Route::get('/admin', [AdminController::class, 'index'])->middleware('admin')->na
 
 Route::patch('/admin/konfirmasi/{pinjaman}', [AdminController::class, 'konfirmasi'])->middleware('admin')->name('admin.konfirmasi');
 
-Route::get('/admin/riwayat-peminjaman', [AdminController::class, 'riwayatTransaksi'])->middleware('admin')->name('admin.riwayat-transaksi');
 
 Route::get('/admin/laporan', [AdminController::class, 'laporan'])->middleware('admin')->name('admin.laporan');
 
@@ -64,6 +63,8 @@ Route::patch('/admin/kelola-pengguna/{user}/toggle-status', [AdminController::cl
 Route::delete('/admin/kelola-pengguna/{user}', [AdminController::class, 'destroyPengguna'])->middleware('admin')->name('admin.kelola-pengguna.destroy');
 
 Route::get('/admin/kelola-petugas', [AdminController::class, 'kelolaPetugas'])->middleware('admin')->name('admin.kelola-petugas.index');
+Route::get('/admin/kelola-petugas/create', [AdminController::class, 'createPetugas'])->middleware('admin')->name('admin.kelola-petugas.create');
+Route::post('/admin/kelola-petugas', [AdminController::class, 'storePetugas'])->middleware('admin')->name('admin.kelola-petugas.store');
 Route::patch('/admin/kelola-petugas/{user}/toggle-status', [AdminController::class, 'toggleStatusPetugas'])->middleware('admin')->name('admin.kelola-petugas.toggle-status');
 
 Route::get('/petugas', [PetugasController::class, 'index'])->middleware('petugas')->name('petugas.dashboard');

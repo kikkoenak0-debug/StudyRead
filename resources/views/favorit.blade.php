@@ -137,7 +137,11 @@
                 @forelse($favorites as $favorit)
                 <div class="book-item" onclick="showBookDetail({{ $favorit->buku->id }}, '{{ $favorit->buku->judul }}', '{{ $favorit->buku->penulis }}', '{{ $favorit->buku->kategori }}', '{{ $favorit->buku->isbn }}', {{ $favorit->buku->tersedia }}, '{{ $favorit->buku->foto ? asset('storage/' . $favorit->buku->foto) : '' }}')">
                     @if($favorit->buku->foto)
-                        <img src="{{ asset('storage/' . $favorit->buku->foto) }}" alt="Cover Buku" class="cover">
+                        @if($favorit->buku->foto && \Illuminate\Support\Facades\Storage::disk('public')->exists($favorit->buku->foto))
+                            <img src="{{ asset('storage/' . $favorit->buku->foto) }}" alt="Cover Buku" class="cover">
+                        @else
+                            <div class="cover" style="display:flex;align-items:center;justify-content:center;">📚</div>
+                        @endif
                     @else
                         <div class="cover">📚</div>
                     @endif

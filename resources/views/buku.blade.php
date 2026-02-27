@@ -201,7 +201,11 @@
                     @forelse($bukus as $item)
                     <a href="{{ route('buku.show', $item->id) }}" class="book-item" style="text-decoration: none; color: inherit;">
                         @if($item->foto)
-                            <img src="{{ asset('storage/' . $item->foto) }}" alt="Cover Buku" class="cover">
+                            @if($item->foto && \Illuminate\Support\Facades\Storage::disk('public')->exists($item->foto))
+                                <img src="{{ asset('storage/' . $item->foto) }}" alt="Cover Buku" class="cover">
+                            @else
+                                <div class="cover" style="display:flex;align-items:center;justify-content:center;">📚</div>
+                            @endif
                         @else
                             <div class="cover">📚</div>
                         @endif
